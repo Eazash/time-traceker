@@ -1,0 +1,17 @@
+{
+  "db": {
+    "name": "db",
+    "connector": "memory"
+  },
+  "MongoDS": {
+    "host": "time-tracker-db.7hwpe.mongodb.net",
+    "port": 27017,
+    "database": "time-tracker",
+    "password": "JXPmsg1X2vBPBB79",
+    "name": "MongoDS",
+    "user": "time-tracker-api-server",
+    "useNewUrlParser": true,
+    "connector": "mongodb",
+    "protocol": "mongodb+srv"
+  }
+}
