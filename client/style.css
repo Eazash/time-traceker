@@ -56,14 +56,27 @@ input[type="radio"]{
 input[type="radio"]:first-child{
     margin-left:0;
 }
-input[type="submit"]{
+.submit{
     border: none;
+    outline: none;
     background: orange;
     color: white;
+    padding: 10px;
+    font-size: 1rem;
+    width:100%;
+    display: block;
+    margin-bottom:15px;
+    border-radius: 3px;
 }
+.error{
+    padding: 5px;
+    border: 3px solid orangered;
+    display: none;
+    color: orangered;
+    border-radius: 3px;
+}
+.error
 input[type="submit"]:focus{
-    width: 344px;
-    height: 45px;
     border: solid orange;
     background: white;
     color: orange;
@@ -71,6 +84,9 @@ input[type="submit"]:focus{
 input[type="radio"]:checked + label{
     font-weight: bold;
     font-size: 18px;
+}
+input:invalid{
+    color: red;
 }
 .link{
     /* font-size: 1.2rem; */

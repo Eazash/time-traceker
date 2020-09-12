@@ -12,14 +12,38 @@
     <div class="login">
         <div class="wrapper">
             <h1>Sign in</h1>
-            <form>
-                <input type="email" name="email" placeholder="Email">
-                <input type="password" name="password" placeholder="password">
-                <input value="SUBMIT" type="Submit" />
-                <p>Don't have an account? <a class="link" href="signup.html">Signup</a></p>
-            </form>
+            <input type="email" name="email" id="email" placeholder="Email">
+            <input type="password" name="password" id="password" placeholder="password">
+            <button class="submit" onclick="login()">Signin</button>
+            <p>Don't have an account? <a class="link" href="signup.html">Signup</a></p>
         </div>
     </div>
+    <script>
+        function login() {
+            let email = document.getElementById('email').value;
+            let password = document.getElementById("password").value;
+            fetch('/api/users/login', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email, password })
+            }).then(response => {
+                //if the user is logged in
+                console.log(response.status)
+                if (response.status === 200) {
+                    response.text().then(data => {
+                        data = JSON.parse(data)
+                        //set the user on localstorage
+                        sessionStorage.setItem("id", data.userId)
+                        sessionStorage.setItem("accesstoken", data.id)
+                        //redirect to home
+                        document.location.replace('/home.html')
+                    })
+                }
+            })
+        }
+    </script>
 </body>
 
 </html>

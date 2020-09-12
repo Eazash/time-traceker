@@ -11,16 +11,66 @@
     <div class="signup">
         <div class="wrapper">
             <h1>Sign up</h1>
-            <form>
-                <input type="text" name="username" placeholder="Username">
-                <input type="email" name="email" placeholder="Email">
-                <input type="password" name="password" placeholder="Password">
-                <input type="password" name="c_password" placeholder="Confirm Password">
-                <input value="SUBMIT" type="Submit" />
-                <p>Already have an account? <a class="loginlink" href="login.html">Login</a></p>
-            </form>
+            <!-- <form novalidate> -->
+            <input type="text" name="username" id="username" placeholder="Username" pattern="/^\S*$/">
+            <input type="email" name="email" id="email" placeholder="Email">
+            <input type="password" name="password" id="password" placeholder="Password">
+            <input type="password" name="c_password" placeholder="Confirm Password">
+            <button class="submit" onclick="submit()">Submit</button>
+            <p>Already have an account? <a class="loginlink" href="login.html">Login</a></p>
+            <!-- </form> -->
+            <div class="error">
+                <span id="error"></span>
+            </div>
         </div>
     </div>
+    <script>
+        function submit() {
+            let password = document.getElementById('password').value, email = document.getElementById('email').value, username = document.getElementById('username').value;
+            fetch('/api/users', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email, password, username })
+            }).then(response => {
+                //if there is 
+                if (response.status === 422) {
+                    let error = document.getElementById('error')
+                    error.textContent = "Username or email already exists"
+                    error.parentNode.style.display = "block";
+                }
+                //if the signup request succeeds
+                if (response.status === 200) {
+                    // login the user
+                    response.text().then(data => {
+                        let user = JSON.parse(data);
+                        fetch('/api/users/login', {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ email: user.email, password })
+                        }).then(response => {
+                            //if the user is logged in
+                            console.log(response.status)
+                            if (response.status === 200) {
+                                response.text().then(data => {
+                                    data = JSON.parse(data)
+                                    //set the user on localstorage
+                                    sessionStorage.setItem("id", data.userId)
+                                    sessionStorage.setItem("accesstoken", data.id)
+                                    //redirect to home
+                                    document.location.replace('/home.html')
+                                })
+                            }
+                        })
+                    })
+                    //redirect to home
+                }
+            })
+        }
+    </script>
 </body>
 
 </html>
