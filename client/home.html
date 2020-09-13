@@ -3,21 +3,243 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"
+    integrity="sha512-quHCp3WbBNkwLfYUMd+KwBAgpVukJu5MncuQaWXgCrfgcxCJAq/fo+oqrRKOj+UKEmyMCG3tb8RB63W+EmrOBg=="
+    crossorigin="anonymous"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    ul {
+      top: 0;
+      margin: 0;
+      box-shadow: 2px 0px 5px grey;
+      background-color: #f2f2f2;
+      overflow: hidden;
+    }
+
+    li {
+      display: inline-block;
+      list-style: none;
+      margin-left: .5rem;
+      padding: 10px;
+      border-left: 2px solid black;
+      text-transform: capitalize;
+      margin: 5px;
+    }
+
+    .right {
+      float: right;
+    }
+
+    .logout {
+      border: none;
+      background-color: orange;
+      border-radius: 3px;
+      outline: none;
+      padding: 5px;
+      margin: 10px;
+    }
+
+    .logout button {
+      background-color: inherit;
+      border: none;
+      outline: none;
+      font-size: medium;
+    }
+
+    .logout:focus {
+      box-shadow: 1px 1px 5px grey;
+    }
+
+    li:first-of-type,
+    li:last-of-type {
+      border: none;
+    }
+
+    .card {
+      max-width: 900px;
+      margin: 10px auto;
+      background-color: #f2f2f2;
+      box-shadow: 4px 4px 8px grey;
+      padding: 1rem;
+      left: 50%;
+    }
+
+    .data {
+      display: inline-block;
+      margin: 0 5px;
+    }
+
+    .data-container {
+      display: inline-block;
+      margin: 0 5px;
+      box-shadow: 0px 2px 5px grey;
+      width: 30%;
+      padding: 1rem;
+    }
+
+    table {
+      width: 95%;
+      border-collapse: collapse;
+      margin: 20px auto;
+      box-shadow: 0px 2px 5px grey;
+    }
+
+    table thead {
+      box-shadow: 0px 2px 5px grey;
+    }
+
+    table th,
+    table td {
+      border-bottom: 1px solid grey;
+      padding: 10px;
+      text-align: left;
+      vertical-align: bottom;
+    }
+
+    tr:nth-child(even) {
+      background-color: #fff;
+    }
+
+    .add-project-container {
+      margin: 5px auto;
+      background-color: #e4e4e4;
+      padding: 10px;
+    }
+
+    input {
+      display: inline;
+      width: 40%;
+      padding: 7px;
+      margin: 5px auto;
+    }
+
+    .add-project-container button {
+      width: 15%;
+      display: inline;
+    }
+
+    .action {
+      border: none;
+      border-radius: 3px;
+      padding: 5px 10px;
+    }
+  </style>
 </head>
 
 <body>
-  <nav>
+  <div id="app">
+    <nav>
+      <ul>
+        <li><span style="text-transform: capitalize;">time-tracker</span></li>
+        <li><span class="username">{{user.username}}</span></li>
+        <li class="right logout"><button v-on:click="logout()">Logout</button></li>
+      </ul>
+    </nav>
+    <main>
+      <div class="dashboard card">
+        <div class="information"></div>
+        <div class="active-project">
+          <h3>Active Project</h3>
+          <hr>
+          <p v-if="activeProject === undefined">No Active project</p>
+          <p v-else><span class="data-container">Name: <span class="data">{{activeProject.name}}</span></span>
+            <span class="data-container">Total Time: <span class="data">{{activeProject.totalTime}}</span></span>
+            <span class="data-container">Current Time: <span class="data">{{timer}}</span></span></p>
+        </div>
+      </div>
+      <div class="projects-list card">
+        <h3>Projects</h3>
+        <hr>
+        <table>
+          <thead>
+            <th>Project Name</th>
+            <th>Total Time</th>
+            <th>Actions</th>
+          </thead>
+          <tbody>
+            <tr v-for="project in projects" :key="project.id">
+              <td>{{project.name}}</td>
+              <td>{{project.totalTime}}</td>
+              <td><button class="action" v-if="project.active" style="background-color: orange;">Stop</button><button
+                  class="action" v-else style="background-color: dodgerblue;" @click="start(project)">start</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <hr>
+        <div class="add-project-container">
+          <input v-model="projectName" placeholder="Project Name">
+          <button class="submit" @click="addProject">Add Project</button>
+        </div>
+      </div>
+  </div>
+  </main>
 
-  </nav>
-  <h2>Home Page</h2>
+  </div>
   <script>
     window.addEventListener('load', function () {
       let userId = sessionStorage.getItem('id');
       let accesstoken = sessionStorage.getItem('accesstoken');
       if (userId === null || accesstoken === null) {
         window.location.replace('/login.html')
+      }
+    })
+    var app = new Vue({
+      el: '#app',
+      data: {
+        message: 'Hello Vue!',
+        user: {},
+        activeProject: undefined,
+        projects: [],
+        projectName: ""
+      },
+      created: async function () {
+        let id = sessionStorage.getItem("id")
+        let user = await axios.get(`/api/users/${id}`).then(response => response.data)
+        this.user = user;
+        this.projects = await axios.get(`/api/users/${id}/projects`).then(response => response.data)
+        // this.activeProject = projects[0]
+      },
+      methods: {
+        logout: function () {
+          sessionStorage.clear();
+          window.location.replace('/login.html')
+        },
+        addProject: async function () {
+          let newProject = await axios.post(`/api/users/${this.user.id}/projects`, { name: this.projectName }).then(response => response.data)
+          this.projects.unshift(newProject)
+        },
+        start: async function (project) {
+          project = await axios.put(`/api/projects/${project.id}/start`).then(response => response.data)
+          // console.log(project)
+          project = project.startTime
+          this.activeProject = project;
+        }
+      },
+      computed: {
+        timer: function () {
+          if (this.activeProject === undefined) {
+            return null
+          }
+          let [timer] = this.activeProject.timers.slice(-1)
+          let startTime = new Date(timer.start);
+          let elapsed = new Date().getTime() - startTime.getTime();
+          return elapsed / 1000
+          var self = this;
+
+          setInterval(function () {
+            self.$data.ticker = elapsed;
+          }, 1000);
+        },
+        now: function () {
+        }
       }
     })
   </script>

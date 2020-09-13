@@ -39,5 +39,13 @@
   "user": {
     "dataSource": "MongoDS",
     "public": true
+  },
+  "project": {
+    "dataSource": "MongoDS",
+    "public": true
+  },
+  "timer": {
+    "dataSource": "MongoDS",
+    "public": true
   }
 }
